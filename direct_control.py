@@ -6,13 +6,11 @@ import joystick_node
 import time
 
 bot = nstbot.EV3Bot()
-#bot.connect(nstbot.connection.Socket('192.168.1.160'))
-bot.connect(nstbot.connection.Socket('10.162.177.187'))
+bot.connect(nstbot.connection.Socket('192.168.1.160'))
+#bot.connect(nstbot.connection.Socket('10.162.177.187'))
 time.sleep(1)
 bot.connection.send('!M+\n')
-bot.activate_sensor('ultrasonic', [1, 2, 3, 4], period=0.5)
-bot.retina(True, bytes_in_timestamp=0)
-bot.show_image(decay=0.4)
+bot.activate_sensor([1, 2, 3, 4], period=0.05)
 
 model = nengo.Network()
 with model:
@@ -27,16 +25,30 @@ with model:
 
     transform = np.array([[-1, 0, -1], [0.5, 1, -0.5], [1, -1, -1]]).T
     nengo.Connection(joystick[[1,0,2]], motor_node[:3],
-                     transform=transform*2, synapse=0.1)
-    nengo.Connection(joystick[3], motor_node[3], transform=-0.1)
+                     transform=transform*2, synapse=None)
+    nengo.Connection(joystick[3], motor_node[3], transform=-0.1, synapse=None)
 
     def sensors(t):
-        #print [bot.ultrasonic[x] for x in [1, 2, 3, 4]]
-        return [bot.ultrasonic[x] for x in [1, 2, 3, 4]]
+        left = (bot.lego_sensors[0] + bot.lego_sensors[1]) * 0.5
+        right = (bot.lego_sensors[2] + bot.lego_sensors[3]) * 0.5
+        #joystick.output.joystick.set_vibration(left, right)
+
+        return bot.lego_sensors
     sensor_node = nengo.Node(sensors, size_out=4)
 
-sim = nengo.Simulator(model)
-while True:
-    sim.run(1, progress_bar=None)
+    #for i in range(10):
+    #    ens = nengo.Ensemble(n_neurons=500, dimensions=4)
+    #    nengo.Connection(sensor_node, ens, synapse=None)
+
+
+import nengo_viz
+viz = nengo_viz.Viz(model)
+viz.value(sensor_node)
+viz.value(joystick)
+viz.start()
+
+#sim = nengo.Simulator(model)
+#while True:
+#    sim.run(1, progress_bar=None)
 
 
