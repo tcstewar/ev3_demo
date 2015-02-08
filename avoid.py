@@ -19,7 +19,7 @@ with model:
     joystick = nengo.Node(joystick_node.Joystick())
 
     control = nengo.networks.EnsembleArray(n_ensembles = 4, n_neurons=100)
-    nengo.Connection(joystick, control.input, synapse=None)
+    nengo.Connection(joystick[:4], control.input, synapse=None)
 
     dz_cfg = nengo.Config(nengo.Ensemble)
     dz_cfg[nengo.Ensemble].intercepts = nengo.dists.Uniform(0.05, 0.9)
@@ -76,6 +76,15 @@ with model:
         return dodge
     nengo.Connection(sensors_us, control.input[0], synapse=synapse,
                      function=avoid_dodge)
+
+
+    avoid_inhibit = nengo.Ensemble(n_neurons=50, dimensions=1,
+                                   intercepts=nengo.dists.Uniform(0.2, 0.9))
+    nengo.Connection(joystick[5], avoid_inhibit, synapse=None)
+    nengo.Connection(avoid_inhibit, sensors_ir.neurons, transform=[[-1]]*200,
+                     synapse=0.1)
+    nengo.Connection(avoid_inhibit, sensors_us.neurons, transform=[[-1]]*200,
+                     synapse=0.1)
 
 import nengo_viz
 viz = nengo_viz.Viz(model)

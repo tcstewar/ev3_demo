@@ -8,7 +8,8 @@ class Joystick(object):
         self.joystick = joysticks[index]
         self.verbose = verbose
         self.axis = dict(r_thumb_x=0, r_thumb_y=0,
-                         l_thumb_x=0, l_thumb_y=0)
+                         l_thumb_x=0, l_thumb_y=0,
+                         left_trigger=0, right_trigger=0)
         self.buttons = {}
         self.size_out = 4
 
@@ -31,7 +32,8 @@ class Joystick(object):
     def __call__(self, t):
         self.joystick.dispatch_events()
         return [self.axis['l_thumb_x'], self.axis['l_thumb_y'],
-                self.axis['r_thumb_x'], self.axis['r_thumb_y']]
+                self.axis['r_thumb_x'], self.axis['r_thumb_y'],
+                self.axis['left_trigger'], self.axis['right_trigger']]
 
 
 if __name__ == '__main__':
