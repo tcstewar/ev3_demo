@@ -29,14 +29,14 @@ with model:
     omni_transform = np.array([[-1, 0, -1], [0.5, 1, -0.5], [1, -1, -1]]).T
     nengo.Connection(control.output[[1, 0, 2]], motor.input[:3],
                      transform=omni_transform * 2, synapse=synapse)
-    nengo.Connection(control.output[3], motor.input[3], transform=-0.1,
+    nengo.Connection(control.output[3], motor.input[3], transform=-1,
                      synapse=synapse)
 
     def bot_motor(t, x):
-        bot.motor(1, x[0], msg_period=0.1)
-        bot.motor(0, x[1], msg_period=0.1)
-        bot.motor(2, x[2], msg_period=0.1)
-        bot.motor(3, x[3], msg_period=0.1)
+        bot.motor(1, x[0], msg_period=0.2)
+        bot.motor(0, x[1], msg_period=0.2)
+        bot.motor(2, x[2], msg_period=0.2)
+        bot.motor(3, x[3]*0.1, msg_period=0.2)
     motor_node = nengo.Node(bot_motor, size_in=4)
     nengo.Connection(motor.output, motor_node, synapse=synapse)
 
@@ -71,12 +71,11 @@ with model:
     nengo.Connection(sensor_node[[0, 3]], sensors_us, synapse=None)
     def avoid_dodge(x):
         dodge = 0
-        dodge -= max(x[0] - 0.5, 0) * 2
-        dodge += max(x[1] - 0.5, 0) * 2
+        dodge -= max(x[0] - 0.5, 0) * 1
+        dodge += max(x[1] - 0.5, 0) * 1
         return dodge
     nengo.Connection(sensors_us, control.input[0], synapse=synapse,
                      function=avoid_dodge)
-
 
 import nengo_viz
 viz = nengo_viz.Viz(model)
